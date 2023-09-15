@@ -2,7 +2,7 @@
 
 (defvar bsp-styleguide-roots
       '(("/styleguide" . "/themes/hg-ucms-theme-default/styleguide") ; Healthgrades
-        ("/frontend/styleguide" . "/frontend/bundles/dispatch-health-bundle-default/styleguide")) ; DH
+        ("/frontend/styleguide" . "/frontend/bundles/dispatch-health-bundle-default/styleguide")) ; DispatchHealth
       "\
 List of cons cells, pairing root styleguide and root theme directories.\
 \
@@ -104,7 +104,6 @@ defines the root styleguide and theme directories for the project."
   (interactive)
   (if (not buffer-file-name)
       (error "No file for this buffer"))
-
   (let ((other-file-name
          (cond
           ((string-suffix-p ".hbs" buffer-file-name)

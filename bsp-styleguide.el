@@ -114,4 +114,30 @@ defines the root styleguide and theme directories for the project."
            (error "Not an .hbs or .json file")))))
     (find-file-other-window other-file-name)))
 
+(defun bsp-styleguide-goto-include ()
+  "Visits the file on the current line, if that line is a \
+BSP styleguide \"_include\" line, optionally creating it if \
+it doesn't already exist."
+  (interactive)
+  (let* ((include-file-path)
+         (project-root (-bsp-styleguide-get-project-root-path))
+         (styleguide-root (concat project-root (car (-bsp-styleguide-get-normalized-root-cell)))))
+    (save-excursion
+      (beginning-of-line)
+      (unless (search-forward "\"_include\": \"" (line-end-position) t)
+        (error "No \"_include\": on current line!"))
+      (let ((path-start (point)))
+        (unless (search-forward "\"" (line-end-position) t)
+          (error "No terminating double quote on include path!"))
+        (setq include-file-path
+              (expand-file-name (concat styleguide-root (buffer-substring path-start (1- (point))))))))
+    (if (file-exists-p include-file-path)
+        (find-file-other-window include-file-path)
+      (if (y-or-n-p (format "File %s doesn't exist; should I create it?" include-file-path))
+          (progn
+            (make-directory (file-name-directory include-file-path) t)
+            (write-region "" nil include-file-path)
+            (find-file-other-window include-file-path)
+            (message "Created %s" include-file-path))))))
+
 (provide 'bsp-styleguide)

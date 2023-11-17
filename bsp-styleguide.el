@@ -82,7 +82,7 @@ the styleguide /group/_Modules.json, if it's not already there."
 If in styleguide, visits the theme file with the same name, or\
 vice versa.\
 \
-The variable `dpt-bsp-styleguide-twins` must be configured to\
+The variable `bsp-styleguide-roots` must be configured to\
 defines the root styleguide and theme directories for the project."
   (interactive)
   (let ((root (-bsp-styleguide-get-normalized-root-cell)))

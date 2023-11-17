@@ -42,7 +42,7 @@ to the project root directory.  It doesn't matter which path\
         root-cell
       (cons (cdr root-cell) (car root-cell)))))
 
-;;; BUGGY: Only works on styleguide .json file, not theme .json file
+;;; TODO: Only works on styleguide .json file, not theme .json file
 (defun bsp-styleguide-add-to-modules-json ()
   "If current buffer is a JSON file in styleguide, or if it's in the theme \
 directory and has a matching file in in the styleguide, add its name to \
@@ -95,7 +95,7 @@ defines the root styleguide and theme directories for the project."
         (if (y-or-n-p (format "File %s doesn't exist; should I create it?" other-file-name))
             (progn
              (make-directory (file-name-directory other-file-name) t)
-             (write-file (file-name-directory other-file-name))
+             (write-region nil nil other-file-name)
              (find-file-other-window other-file-name)
              (message (format "Created %s" other-file-name))))))))
 

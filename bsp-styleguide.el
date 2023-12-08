@@ -124,7 +124,10 @@ defines the root styleguide and theme directories for the project."
       (let ((path-start (point)))
         (unless (search-forward "\"" (line-end-position) t)
           (error "No terminating double quote on include path!"))
-        (expand-file-name (concat styleguide-root (buffer-substring path-start (1- (point)))))))))
+        (let ((path (buffer-substring path-start (1- (point)))))
+          (if (string-prefix-p "/" path) ; absolute(ish) path?
+              (expand-file-name (concat styleguide-root path))
+            (concat (file-name-directory (buffer-file-name)) path)))))))
 
 (defun bsp-styleguide-goto-include ()
   "Visits the file on the current line, if that line is a \

@@ -3,8 +3,8 @@
 ;; Fun hack, completely dependent on my diary.org org-table conventions.
 ;; Move point to a line within my releases table, where the first
 ;; column is a ticket number and the second column is a brief description.
-(defun bsp-start-task ()
-  (interactive)
+(defun bsp-start-task (omit-time)
+  (interactive "*P")
   (unless (org-at-table-p)
     (error "Cursor should be on a table with a ticket"))
   (beginning-of-line)
@@ -19,7 +19,9 @@
     (search-forward "***")
     (previous-line)
     (insert
-     (format-time-string "%_I:%0M %^p" (bsp-round-time-to-nearest-5-min))
+     (if omit-time
+         "        "
+       (format-time-string "%_I:%0M %^p" (bsp-round-time-to-nearest-5-min)))
      " HG - "
      ticket-id
      " "

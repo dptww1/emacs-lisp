@@ -114,13 +114,13 @@ defines the root styleguide and theme directories for the project."
            (error "Not an .hbs or .json file")))))
     (find-file-other-window other-file-name)))
 
-(defun -bsp-styleguide-parse-include-path (prefix)
+(defun -bsp-styleguide-parse-include-path (prefix-regexp)
   (let* ((project-root (-bsp-styleguide-get-project-root-path))
          (styleguide-root (concat project-root (car (-bsp-styleguide-get-normalized-root-cell)))))
     (save-excursion
       (beginning-of-line)
-      (unless (search-forward prefix (line-end-position) t)
-        (error "No %s on current line!" prefix))
+      (unless (re-search-forward prefix-regexp (line-end-position) t)
+        (error "No %s on current line!" prefix-regexp))
       (let ((path-start (point)))
         (unless (search-forward "\"" (line-end-position) t)
           (error "No terminating double quote on include path!"))
@@ -131,15 +131,15 @@ defines the root styleguide and theme directories for the project."
 
 (defun bsp-styleguide-goto-include ()
   "Visits the file on the current line, if that line is a \
-JSON \"_include\" or HBS {{include}}, optionally creating it if \
-it doesn't already exist."
+JSON \"_include\", JSON \"_template\", or HBS {{include}}, \
+creating it if it doesn't already exist."
   (interactive)
   (let ((include-file-path
          (cond
           ((string-suffix-p ".json" (buffer-file-name))
-           (-bsp-styleguide-parse-include-path "\"_include\": \""))
+           (-bsp-styleguide-parse-include-path "\"\\(_include\\|_template\\)\": \""))
           ((string-suffix-p ".hbs" (buffer-file-name))
-           (-bsp-styleguide-parse-include-path "{{include \"")))))
+           (-bsp-styleguide-parse-include-path "{{~*include \"")))))
     (if (file-exists-p include-file-path)
         (find-file-other-window include-file-path)
       (if (y-or-n-p (format "File %s doesn't exist; should I create it?" include-file-path))

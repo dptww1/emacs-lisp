@@ -10,6 +10,10 @@
   (beginning-of-line)
   (org-table-next-field)
   (let* ((ticket-id (string-trim (org-table-get-field)))
+         (project-code
+          (progn
+            (string-match "\\w+:\\(\\w+\\)-" ticket-id)
+            (match-string 1 ticket-id)))
          (ticket-desc
           (progn
             (org-table-next-field)
@@ -22,14 +26,16 @@
      (if omit-time
          "        "
        (format-time-string "%_I:%0M %^p" (bsp-round-time-to-nearest-5-min)))
-     " HG - "
+     " "
+     project-code
+     " - "
      ticket-id
      " "
      ticket-desc
      ?\n)
     (previous-line)
     (beginning-of-line)
-    (search-forward "HG - " nil nil)))
+    (search-forward (concat project-code " - " nil nil))))
 
 (defun bsp-round-time-to-nearest-5-min ()
   (let* ((num_secs (time-convert (current-time) 'integer))

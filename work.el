@@ -18,6 +18,8 @@
           (progn
             (org-table-next-field)
             (string-trim (org-table-get-field)))))
+    (if (equal project-code "UT")
+        (setq project-code "HG"))
     (search-forward "Work Log")
     (search-forward "*****")
     (search-forward "***")

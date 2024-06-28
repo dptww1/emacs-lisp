@@ -1,15 +1,16 @@
 (require 'cl-extra)
 
 (defvar bsp-styleguide-roots
-      '(("/styleguide" . "/themes/hg-ucms-theme-default/styleguide") ; Healthgrades
-        ("/frontend/styleguide" . "/frontend/bundles/dispatch-health-bundle-default/styleguide")) ; DispatchHealth
-      "\
-List of cons cells, pairing root styleguide and root theme directories.\
-\
-Each unique project directory structure requires its own cons cell\
-in the list.  The paths within the cons cell should be relative\
-to the project root directory.  It doesn't matter which path\
-(styleguide or theme) is in the car and which is in the cdr.")
+  '(("ucms-app" ("/styleguide" . "/themes/hg-ucms-theme-default/styleguide"))
+    ("dispatch-health" ("/frontend/styleguide" . "/frontend/bundles/dispatch-health-bundle-default/styleguide"))
+    ("syndsearch-app" ("styleguide" . "/themes/hg-search/theme/default/styleguide")))
+  "\
+List of string / cons cells pairs. The strings are project root names
+and the corresponding cons cells are pairs of paths relative to the
+project root giving the styleguide and theme directories for that
+project.  (The order doesn't matter.)
+
+This unfortunately doesn't work for multi-theme projects.")
 
 (defun -bsp-styleguide-get-project-root-path ()
   (if (not buffer-file-name)
@@ -21,17 +22,13 @@ to the project root directory.  It doesn't matter which path\
     root))
 
 (defun -bsp-styleguide-get-root-cell (root-path)
-  (cl-some
-   (lambda (cell)
-     (let ((path-lhs (expand-file-name (concat root-path (car cell))))
-           (path-rhs (expand-file-name (concat root-path (cdr cell)))))
-       (cond
-        ((string-prefix-p path-lhs buffer-file-name)
-         cell)
-        ((string-prefix-p path-rhs buffer-file-name)
-         cell)
-        (t nil))))
-   bsp-styleguide-roots))
+  (let ((root-dirname (file-name-nondirectory (directory-file-name root-path))))
+    (cl-some
+     (lambda (root-list)
+       (if (equal (car root-list) root-dirname)
+           (cadr root-list)
+         nil))
+     bsp-styleguide-roots)))
 
 (defun -bsp-styleguide-get-normalized-root-cell ()
   (let* ((root-path (-bsp-styleguide-get-project-root-path))

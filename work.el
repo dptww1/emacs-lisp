@@ -46,4 +46,19 @@
         (- num_secs five-min-modulo)
       (+ num_secs (- 300 five-min-modulo)))))
 
+(defun dt/delete-json-field-safely ()
+  "Deletes the current line and removes any trailing comma
+on the previous line if the now-current line starts with a
+`}' or `]' character, which would result in a JSON syntax error."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (delete-region (point) (1+ (pos-eol)))
+    ;; is this was the last field in an array or object,
+    ;; get rid of any trailing comma on the previous line
+    (if (looking-at "[[:space:]]*[]}]")
+        (progn
+          (previous-line)
+          (replace-regexp-in-region ",[[:space:]]*$" "" (point) (pos-eol))))))
+
 (provide 'bsp-work)

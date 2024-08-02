@@ -128,13 +128,13 @@ defines the root styleguide and theme directories for the project."
 
 (defun bsp-styleguide-goto-include ()
   "Visits the file on the current line, if that line is a \
-JSON \"_include\", JSON \"_template\", or HBS {{include}}, \
-creating it if it doesn't already exist."
+JSON \"_include\", JSON \"_template\", JSON \"_styledTemplate\", \
+or HBS {{include}}, creating it if it doesn't already exist."
   (interactive)
   (let ((include-file-path
          (cond
           ((string-suffix-p ".json" (buffer-file-name))
-           (-bsp-styleguide-parse-include-path "\"\\(_include\\|_template\\)\": \""))
+           (-bsp-styleguide-parse-include-path "\"\\(_include\\|_template\\|_styledTemplate\\)\": \""))
           ((string-suffix-p ".hbs" (buffer-file-name))
            (-bsp-styleguide-parse-include-path "{{~*include \"")))))
     (if (file-exists-p include-file-path)

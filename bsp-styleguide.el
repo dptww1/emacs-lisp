@@ -73,32 +73,44 @@ the styleguide /group/_Modules.json, if it's not already there."
       (insert "  }")
       (message (concat "Added " current-buffer-relative-path)))))
 
-(defun bsp-styleguide-other-file ()
+(defun bsp-styleguide-other-file (where)
   "Visits the styleguide/theme file shadowing the current buffer.\
 \
-If in styleguide, visits the theme file with the same name, or\
+If in styleguide, visits the theme file with the same path, or\
 vice versa.\
 \
 The variable `bsp-styleguide-roots` must be configured to\
-defines the root styleguide and theme directories for the project."
-  (interactive)
+defines the root styleguide and theme directories for the project.
+
+With no prefix argument, visits the file in the current window.
+
+With prefix argument `4', visits the file in a new window.
+
+With prefix argument `5', visits the file in a new frame."
+  (interactive "p")
   (let ((root (-bsp-styleguide-get-normalized-root-cell)))
     (if (not root)
         (error "Not in a configured project directory"))
 
     (let ((other-file-name (string-replace (car root) (cdr root) buffer-file-name)))
       (if (file-exists-p other-file-name)
-          (find-file-other-window other-file-name)
+          (-bsp-styleguide-find-file other-file-name where)
         (if (y-or-n-p (format "File %s doesn't exist; should I create it?" other-file-name))
             (progn
              (make-directory (file-name-directory other-file-name) t)
              (write-region nil nil other-file-name)
-             (find-file-other-window other-file-name)
+             (-bsp-styleguide-find-file other-file-name where)
              (message (format "Created %s" other-file-name))))))))
 
-(defun bsp-styleguide-other-type ()
-  "Visit the companion HBS or JSON file for the current buffer."
-  (interactive)
+(defun bsp-styleguide-other-type (where)
+  "Visit the companion HBS or JSON file for the current buffer.
+
+With no prefix argument, visits the file in the current window.
+
+With prefix argument `4', visits the file in a new window.
+
+With prefix argument `5', visits the file in a new frame."
+  (interactive "p")
   (if (not buffer-file-name)
       (error "No file for this buffer"))
   (let ((other-file-name
@@ -109,7 +121,7 @@ defines the root styleguide and theme directories for the project."
            (string-replace ".json" ".hbs" buffer-file-name))
           (t
            (error "Not an .hbs or .json file")))))
-    (find-file-other-window other-file-name)))
+    (-bsp-styleguide-find-file other-file-name where)))
 
 (defun -bsp-styleguide-parse-include-path (prefix-regexp)
   (let* ((project-root (-bsp-styleguide-get-project-root-path))
@@ -126,11 +138,17 @@ defines the root styleguide and theme directories for the project."
               (expand-file-name (concat styleguide-root path))
             (concat (file-name-directory (buffer-file-name)) path)))))))
 
-(defun bsp-styleguide-goto-include ()
-  "Visits the file on the current line, if that line is a \
-JSON \"_include\", JSON \"_template\", JSON \"_styledTemplate\", \
-or HBS {{include}}, creating it if it doesn't already exist."
-  (interactive)
+(defun bsp-styleguide-goto-include (where)
+  "Visits the file on the current line, if that line is a
+JSON \"_include\", JSON \"_template\", JSON \"_styledTemplate\",
+or HBS {{include}}, optionally creating it if it doesn't already exist.
+
+With no prefix argument, visits the file in the current window.
+
+With prefix argument `4', visits the file in a new window.
+
+With prefix argument `5', visits the file in a new frame."
+  (interactive "p")
   (let ((include-file-path
          (cond
           ((string-suffix-p ".json" (buffer-file-name))
@@ -138,12 +156,20 @@ or HBS {{include}}, creating it if it doesn't already exist."
           ((string-suffix-p ".hbs" (buffer-file-name))
            (-bsp-styleguide-parse-include-path "{{~*include \"")))))
     (if (file-exists-p include-file-path)
-        (find-file-other-window include-file-path)
+        (-bsp-styleguide-find-file include-file-path where)
       (if (y-or-n-p (format "File %s doesn't exist; should I create it?" include-file-path))
           (progn
             (make-directory (file-name-directory include-file-path) t)
             (write-region "" nil include-file-path)
-            (find-file-other-window include-file-path)
+            (-bsp-styleguide-find-file include-file-path where)
             (message "Created %s" include-file-path))))))
 
+(defun -bsp-styleguide-find-file (filename where)
+  (cond
+   ((= 4 where)
+    (find-file-other-window filename))
+   ((= 5 where)
+    (find-file-other-frame filename))
+   (t
+    (find-file filename))))
 (provide 'bsp-styleguide)

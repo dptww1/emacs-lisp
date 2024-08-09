@@ -172,4 +172,15 @@ With prefix argument `5', visits the file in a new frame."
     (find-file-other-frame filename))
    (t
     (find-file filename))))
+
+(defun bsp-styleguide-convert-to-styled-template ()
+  "Convert an \"_include\" on the current line to a \"_styledTemplate\"."
+  (interactive)
+  (save-excursion
+    (let ((b (line-beginning-position))
+          (e (line-end-position)))
+      (replace-string-in-region ".json" ".hbs" b e)
+      (unless (replace-string-in-region "_include" "_styledTemplate" b e)
+        (error "No _include on current line!")))))
+
 (provide 'bsp-styleguide)

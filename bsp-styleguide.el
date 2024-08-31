@@ -180,7 +180,7 @@ With prefix argument `5', visits the file in a new frame."
     (let ((b (line-beginning-position))
           (e (line-end-position)))
       (replace-string-in-region ".json" ".hbs" b e)
-      (unless (replace-string-in-region "_include" "_styledTemplate" b e)
+      (unless (replace-regexp-in-region "_include\\|_template" "_styledTemplate" b e)
         (error "No _include on current line!")))))
 
 (provide 'bsp-styleguide)
